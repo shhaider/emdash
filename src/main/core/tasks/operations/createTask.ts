@@ -9,6 +9,7 @@ import type {
   TaskLifecycleStatus,
 } from '@shared/tasks';
 import { projectManager } from '@main/core/projects/project-manager';
+import { applyBeforeProvisionGate } from '@main/core/tasks/before-provision-gate';
 import { taskManager } from '@main/core/tasks/task-manager';
 import { db } from '@main/db/client';
 import { tasks } from '@main/db/schema';
@@ -213,6 +214,12 @@ export async function createTask(
   }
 
   const task = mapTaskRowToTask(taskRow, prs);
+
+  try {
+    await applyBeforeProvisionGate(task, project);
+  } catch (e) {
+    return err({ type: 'provision-failed', message: e instanceof Error ? e.message : String(e) });
+  }
 
   const provisionResult = await taskManager.provisionTask(project, task, [], []);
   if (!provisionResult.success) {
