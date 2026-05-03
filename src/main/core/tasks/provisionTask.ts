@@ -1,6 +1,7 @@
 import { eq, sql } from 'drizzle-orm';
 import { mapConversationRowToConversation } from '@main/core/conversations/utils';
 import { projectManager } from '@main/core/projects/project-manager';
+import { applyBeforeProvisionGate } from '@main/core/tasks/before-provision-gate';
 import { formatProvisionTaskError } from '@main/core/tasks/provision-task-error';
 import { taskManager } from '@main/core/tasks/task-manager';
 import { mapTerminalRowToTerminal } from '@main/core/terminals/core';
@@ -28,6 +29,8 @@ export async function provisionTask(taskId: string) {
       sshConnectionId: undefined,
     };
   }
+
+  await applyBeforeProvisionGate(task, project);
 
   const [existingTerminals, existingConversations] = await Promise.all([
     db

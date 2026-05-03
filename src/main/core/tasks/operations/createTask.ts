@@ -16,7 +16,7 @@ import { capture } from '@main/lib/telemetry';
 import { createConversation } from '../../conversations/createConversation';
 import { prQueryService } from '../../pull-requests/pr-query-service';
 import { appSettingsService } from '../../settings/settings-service';
-import type { ProvisionTaskError } from '../provision-task-error';
+import { formatProvisionTaskError, type ProvisionTaskError } from '../provision-task-error';
 import { resolveTaskBranchName } from '../resolveTaskBranchName';
 import { toStoredBranch } from '../stored-branch';
 import { mapTaskRowToTask } from '../utils/utils';
@@ -34,7 +34,7 @@ function mapProvisionError(error: ProvisionTaskError): CreateTaskError {
     case 'timeout':
       return { type: 'provision-timeout', timeoutMs: error.timeout, step: error.step };
     default:
-      return { type: 'provision-failed', message: error.message };
+      return { type: 'provision-failed', message: formatProvisionTaskError(error) };
   }
 }
 

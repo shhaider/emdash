@@ -9,7 +9,8 @@ export type ProvisionTaskError =
   | { type: 'timeout'; message: string; timeout: number; step: ProvisionStep | null }
   | { type: 'branch-not-found'; branch: string }
   | { type: 'worktree-setup-failed'; branch: string; message?: string }
-  | { type: 'error'; message: string };
+  | { type: 'error'; message: string }
+  | { type: 'hook-denied'; hookName: string; reason: string; details?: string };
 
 export type TeardownTaskError =
   | { type: 'timeout'; message: string; timeout: number }
@@ -53,7 +54,8 @@ export function isProvisionTaskError(e: unknown): e is ProvisionTaskError {
     type === 'timeout' ||
     type === 'error' ||
     type === 'branch-not-found' ||
-    type === 'worktree-setup-failed'
+    type === 'worktree-setup-failed' ||
+    type === 'hook-denied'
   );
 }
 
@@ -69,5 +71,9 @@ export function formatProvisionTaskError(error: ProvisionTaskError): string {
       return error.message
         ? `Failed to set up worktree for branch "${error.branch}": ${error.message}`
         : `Failed to set up worktree for branch "${error.branch}"`;
+    case 'hook-denied':
+      return error.details
+        ? `Hook "${error.hookName}" denied: ${error.reason} (${error.details})`
+        : `Hook "${error.hookName}" denied: ${error.reason}`;
   }
 }
