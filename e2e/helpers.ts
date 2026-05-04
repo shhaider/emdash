@@ -1,11 +1,21 @@
 import { _electron as electron, type ElectronApplication, type Page } from '@playwright/test';
 import path from 'node:path';
 import fs from 'node:fs';
+import os from 'node:os';
 import { fileURLToPath } from 'node:url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const EMDASH_ROOT = path.resolve(__dirname, '..');
+
+let _e2eUserDataDir: string | null = null;
+
+function getE2EUserDataDir(): string {
+  if (!_e2eUserDataDir) {
+    _e2eUserDataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'emdash-e2e-userdata-'));
+  }
+  return _e2eUserDataDir;
+}
 
 export async function launchApp(options?: {
   env?: Record<string, string>;
@@ -18,13 +28,16 @@ export async function launchApp(options?: {
     );
   }
 
+  const userDataDir = getE2EUserDataDir();
+
   const app = await electron.launch({
-    args: [EMDASH_ROOT],
+    args: ['--user-data-dir=' + userDataDir, EMDASH_ROOT],
     cwd: EMDASH_ROOT,
     env: {
       ...process.env,
       NODE_ENV: 'production',
       TELEMETRY_ENABLED: 'false',
+      EMDASH_DB_FILE: path.join(userDataDir, 'emdash-e2e.db'),
       ...options?.env,
     },
   });
