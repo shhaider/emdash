@@ -31,8 +31,9 @@ export async function launchApp(options?: {
   const userDataDir = getE2EUserDataDir();
 
   const app = await electron.launch({
-    args: ['--user-data-dir=' + userDataDir, EMDASH_ROOT],
+    args: ['--user-data-dir=' + userDataDir, '--force-device-scale-factor=1', EMDASH_ROOT],
     cwd: EMDASH_ROOT,
+    colorScheme: 'light',
     env: {
       ...process.env,
       NODE_ENV: 'production',
