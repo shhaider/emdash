@@ -239,16 +239,16 @@ test('J6: emdash project with hooks.json + deny bridge — provision attempt blo
         });
       }, projectDir);
 
-      // Use "Open project" card if visible, otherwise "Add Project" sidebar button
-      const openBtn = page.getByText('Open project');
-      const addBtn = page.getByText('Add Project');
-      if (await openBtn.isVisible({ timeout: 2000 }).catch(() => false)) {
-        await openBtn.click();
-      } else {
-        await addBtn.click();
-        await page.waitForTimeout(1000);
-        await page.getByText('Choose').click();
+      // Always use "Add Project" sidebar — works regardless of existing projects
+      await page.getByText('Add Project').click();
+      await page.waitForTimeout(1000);
+      await page.getByText('Choose').click();
+      await page.waitForTimeout(2000);
+      const nameField = page.getByPlaceholder('Enter a project name');
+      if (await nameField.isVisible({ timeout: 1000 }).catch(() => false)) {
+        await nameField.fill('Hook Test');
       }
+      await page.getByRole('button', { name: /Create/i }).click();
       await page.waitForTimeout(5000);
       await page.screenshot({ path: 'e2e/screenshots/j6-01-project-opened.png' });
 
